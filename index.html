@@ -167,8 +167,8 @@
   </div>
 
   <div class="fallback" id="fallback">
-    <a class="btn" id="store-btn" href="#">ดาวน์โหลดแอป SAM</a>
-    <a class="btn-outline" id="retry-btn" href="#">ลองเปิดแอปอีกครั้ง</a>
+    <a class="btn" id="retry-btn" href="#">Open SAM+ Application</a>
+    <a class="btn-outline" id="store-btn" href="#">Download SAM+ Application</a>
   </div>
 
 </div>
@@ -189,13 +189,11 @@
   let storeURL = 'https://mobile.sam.or.th/app-download/';
   if (deeplinkParams.length) storeURL += '?' + deeplinkParams.join('&');
 
-  document.getElementById('store-btn').href  = storeURL;
-  document.getElementById('retry-btn').href  = deeplink;
+  document.getElementById('store-btn').href = storeURL;
+  document.getElementById('retry-btn').href = deeplink;
 
-  // พยายามเปิด deeplink
   window.location.href = deeplink;
 
-  // นับถอยหลัง 3 วิ แล้วไป store
   let secondsLeft = 3;
   const countdownEl = document.getElementById('countdown');
 
@@ -209,15 +207,13 @@
     }
   }, 1000);
 
-  // ถ้าแอปเปิดสำเร็จ หน้าจะ hidden → ยกเลิก redirect
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') clearInterval(timer);
   });
 
-  // ถ้า user กลับมา (focus) แสดงปุ่ม fallback
   window.addEventListener('focus', () => {
     clearInterval(timer);
-    document.getElementById('loading').style.display  = 'none';
+    document.getElementById('loading').style.display = 'none';
     document.getElementById('fallback').style.display = 'block';
   });
 </script>
