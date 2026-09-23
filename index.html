@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>กำลังเปิดแอป SAM...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'TH Sarabun New', 'Sarabun', sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      text-align: center;
+      padding: 40px 24px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      max-width: 360px;
+      width: 100%;
+      margin: 16px;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1B4D2E;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e0e0e0;
+      border-top: 4px solid #1B4D2E;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .countdown {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 24px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: #1B4D2E;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+    .btn:hover { background: #154023; }
+    .btn-outline {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 12px 32px;
+      background: white;
+      color: #1B4D2E;
+      border: 2px solid #1B4D2E;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      width: 100%;
+    }
+    #status { display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- SAM Logo SVG -->
+  <svg class="logo" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <rect width="80" height="80" rx="16" fill="#1B4D2E"/>
+    <polygon points="40,10 65,55 15,55" fill="#2E7D4F"/>
+    <polygon points="40,22 58,50 22,50" fill="#1B4D2E"/>
+    <polygon points="22,44 35,44 40,52 27,52" fill="#C49A8A"/>
+    <polygon points="40,52 53,52 58,44 45,44" fill="#C49A8A"/>
+    <text x="40" y="72" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="16" fill="white" letter-spacing="2">SAM</text>
+  </svg>
+
+  <h1>กำลังเปิดแอป SAM</h1>
+  <p class="subtitle">กรุณารอสักครู่...</p>
+
+  <div class="spinner"></div>
+  <p class="countdown" id="countdown">กำลังเปิดแอป...</p>
+
+  <div id="fallback" style="display:none;">
+    <p class="subtitle">ไม่พบแอป SAM บนอุปกรณ์ของท่าน<br>กรุณาดาวน์โหลดก่อนใช้งาน</p>
+    <a class="btn" id="store-btn" href="#">ดาวน์โหลดแอป SAM</a>
+    <a class="btn-outline" id="retry-btn" href="#">ลองเปิดแอปอีกครั้ง</a>
+  </div>
+
+</div>
+
+<script>
+  // ดึง query string จาก URL
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get('source') || '';
+  const contractId = params.get('contract_id') || '';
+  const action = params.get('action') || '';
+
+  // สร้าง deeplink พร้อม parameter
+  let deeplinkParams = [];
+  if (source) deeplinkParams.push('source=' + encodeURIComponent(source));
+  if (contractId) deeplinkParams.push('contract_id=' + encodeURIComponent(contractId));
+  if (action) deeplinkParams.push('action=' + encodeURIComponent(action));
+
+  const deeplink = 'samapp://home' + (deeplinkParams.length ? '?' + deeplinkParams.join('&') : '');
+
+  // Store fallback URL พร้อม query string ต่อ
+  let storeURL = 'https://mobile.sam.or.th/app-download/';
+  if (deeplinkParams.length) {
+    storeURL += '?' + deeplinkParams.join('&');
+  }
+
+  // Set store button
+  document.getElementById('store-btn').href = storeURL;
+  document.getElementById('retry-btn').href = deeplink;
+
+  // พยายามเปิด deeplink
+  window.location.href = deeplink;
+
+  // Countdown 3 วินาที
+  let secondsLeft = 3;
+  const countdownEl = document.getElementById('countdown');
+
+  const timer = setInterval(() => {
+    secondsLeft--;
+    if (secondsLeft > 0) {
+      countdownEl.textContent = 'กำลังเปิดแอป... (' + secondsLeft + ')';
+    } else {
+      clearInterval(timer);
+      // ถ้าหน้ายังอยู่ที่นี่แปลว่าแอปไม่ได้เปิด → ไปที่ fallback page
+      window.location.href = storeURL;
+    }
+  }, 1000);
+
+  // ถ้า user กลับมาที่หน้านี้ (แอปเปิดแล้วกด back) → ยกเลิก redirect
+  window.addEventListener('focus', () => {
+    clearInterval(timer);
+    document.getElementById('fallback').style.display = 'block';
+    countdownEl.style.display = 'none';
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      // แอปเปิดสำเร็จ → ยกเลิก redirect ไป store
+      clearInterval(timer);
+    }
+  });
+</script>
+
+</body>
+</html>
