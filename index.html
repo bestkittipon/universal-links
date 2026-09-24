@@ -194,8 +194,13 @@
 
   window.location.href = deeplink;
 
+  let appOpened = false;
   let secondsLeft = 3;
   const countdownEl = document.getElementById('countdown');
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') appOpened = true;
+  });
 
   const timer = setInterval(() => {
     secondsLeft--;
@@ -203,19 +208,14 @@
       countdownEl.textContent = 'กำลังเปิดแอป... (' + secondsLeft + ')';
     } else {
       clearInterval(timer);
-      window.location.href = storeURL;
+      if (!appOpened) {
+        window.location.href = storeURL;
+      } else {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('fallback').style.display = 'block';
+      }
     }
   }, 1000);
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') clearInterval(timer);
-  });
-
-  window.addEventListener('focus', () => {
-    clearInterval(timer);
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('fallback').style.display = 'block';
-  });
 </script>
 
 </body>
